@@ -1,0 +1,9 @@
+dhcp enable
+dhcp snooping enable ipv4
+vlan {{host['vlan']}}
+ dhcp snooping enable
+ dhcp snooping trusted interface {{host['parsed_intf']}}
+ quit
+save
+y
+
