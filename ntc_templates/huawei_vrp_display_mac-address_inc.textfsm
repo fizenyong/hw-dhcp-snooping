@@ -1,0 +1,17 @@
+Value Required MAC_ADDR ([\w\d-]+)
+Value VLAN (\d+)
+Value VSI (\S+)
+Value BD (\S+)
+Value INTERF ([\w\d-]+)
+Value TYPE (static|dynamic)
+
+
+Start
+  ^MAC\s+Address\s+VLAN\/VSI\/BD\s+Learned-From\s+Type\s*$$ -> MacTable
+  
+MacTable
+  ^${MAC_ADDR}\s+${VLAN}/${VSI}/${BD}\s+${INTERF}\s+${TYPE} -> Record
+  ^Total items
+  ^\s*$$
+  ^-+
+  ^. -> Error
