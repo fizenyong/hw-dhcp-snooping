@@ -1,0 +1,13 @@
+---
+AD-MDF-AS-S5731-STACK-01:
+  groups:
+    - Test
+  hostname: 192.168.1.1
+  data:
+    role: access
+AMC-AS-S5731-STACK-01:
+  groups:
+    - Prod
+  hostname: 10.1.15.1
+  data:
+    role: access

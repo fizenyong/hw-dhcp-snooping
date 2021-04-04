@@ -1,0 +1,18 @@
+## Groups File
+##https://github.com/ktbyers/netmiko/blob/master/netmiko/ssh_dispatcher.py
+---
+Test:
+  username: admin
+  password: admin
+  platform: dlink_ds
+  data:
+    vlan: 31
+    ser_mac: 0abc
+
+Prod:
+  username: admin
+  password: Huawei@123
+  platform: huawei
+  data:
+    vlan: 31
+    ser_mac: 0abc
