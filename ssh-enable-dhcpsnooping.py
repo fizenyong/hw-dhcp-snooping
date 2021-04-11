@@ -5,7 +5,7 @@ from nornir_utils.plugins.tasks.files import write_file
 from nornir_netmiko.tasks import netmiko_send_command, netmiko_send_config
 from nornir_jinja2.plugins.tasks import template_file
 from nornir.core.filter import F
-from ntc_templates.parse import parse_output
+from genie_hw.parse import parse_genie
 import logging
 
 
@@ -27,11 +27,7 @@ def get_config(task: Task):
         task=netmiko_send_command,
         command_string=f"disp mac-address vlan {task.host['vlan']} | inc {task.host['ser_mac']}",
     )
-    task.run(
-        name="Dhcp snooping binding table",
-        task=netmiko_send_command,
-        command_string=f"display dhcp snooping user-bind vlan {task.host['vlan']}",
-    )
+
     task.run(
         task=write_file,
         filename=f"logs/{task.host.name}.txt",
@@ -39,11 +35,13 @@ def get_config(task: Task):
         severity_level=logging.DEBUG,
     )
 
-    # Parse display using textfsm
-    parsed = parse_output("huawei_vrp", "disp mac | inc", task.results[0].result)
-    task.host["parsed_intf"] = parsed[0]["interf"]
+    parsed = parse_genie("huawei", "disp mac", task.results[0].result)
+    task.host["parsed_intf"] = list(
+        parsed["mac_table"]["vlans"][str(task.host["vlan"])]["mac_addresses"][task.host["ser_mac"]
+        ]["interfaces"].items()
+    )[0][0]
 
-    return Result(host=task.host, result=parsed[0]["interf"])
+    return Result(host=task.host, result=task.host["parsed_intf"])
 
 
 def send_config(task: Task, cli_tpl: str):
@@ -58,7 +56,7 @@ def send_config(task: Task, cli_tpl: str):
     task.run(
         name="Send config",
         task=netmiko_send_config,
-        command_commands=task.results[0].result.split("\n"),
+        config_commands=task.results[0].result.split("\n"),
     )
 
     task.run(
@@ -68,6 +66,28 @@ def send_config(task: Task, cli_tpl: str):
         append=True,
         severity_level=logging.DEBUG,
     )
+
+
+def verify_config(task: Task):
+    task.run(
+        name="DHCP snooping configuration",
+        task=netmiko_send_command,
+        command_string=f"display dhcp snooping configuration",
+    )
+
+    task.run(
+        task=write_file,
+        filename=f"logs/{task.host.name}.txt",
+        content=result_content(task),
+        append=True,
+        severity_level=logging.DEBUG,
+    )
+
+    parsed = parse_genie("huawei", "disp dhcp", task.results[0].result)
+    # Verify dhcp snooping enabled globally and vlan
+    assert parsed["enabled"] == True, "DHCP snooping globally not enabled"
+    assert (parsed["vlans"][str(task.host["vlan"])]["enabled"] == True
+    ), f"DHCP snooping vlan {task.host['vlan']} not enabled"
 
 
 if __name__ == "__main__":
@@ -81,6 +101,10 @@ if __name__ == "__main__":
     print_result(result)
     # Config
     result = test_env.run(task=send_config, cli_tpl="cli-dhcpsnoop-en.j2")
+    print_result(result)
+
+    # Verification
+    result = test_env.run(task=verify_config)
     print_result(result)
 
     print_title("Running on Prod env")
