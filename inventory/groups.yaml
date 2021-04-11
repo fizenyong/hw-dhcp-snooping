@@ -3,11 +3,11 @@
 ---
 Test:
   username: admin
-  password: admin
-  platform: dlink_ds
+  password: Huawei@123
+  platform: huawei
   data:
-    vlan: 31
-    ser_mac: 0abc
+    vlan: 1
+    ser_mac: 1c5f-2bf3-870f
 
 Prod:
   username: admin
