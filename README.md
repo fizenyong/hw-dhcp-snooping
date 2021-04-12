@@ -13,6 +13,8 @@ Script created using:
 
 ## Getting Started
 1. Install dependency
+   1. Branch `main` using TextFSM parser
+   2. Branch `genie-parser` using Genie parser
 ```sh
 pip install -r requirements.txt
 ```
@@ -56,8 +58,8 @@ Test:
 python ssh-enable-dhcpsnooping
 ```
 
-## Test
-Tested on:
+## Supported Device
+Huawei VRP5 network devices. Tested on:
 * Huawei S5730-SI of V200R013
 * Huawei S5730-SI of V200R019
 
@@ -75,5 +77,5 @@ MAC Address    VLAN/VSI/BD                       Learned-From        Type
 1c5f-2bf3-870f 31/-/-                            Eth-Trunk1          dynamic   
  
 ```
-4. Deliver the commands rendered of template `inventory/cli-dhcpsnoop-en.j2`
-5. Verify the dhcp snooping status state by `disp dhcp snooping configuration`
+4. Deliver the commands rendered of `inventory/cli-dhcpsnoop-en.j2`
+5. Verify the dhcp snooping state by `disp dhcp snooping configuration`
