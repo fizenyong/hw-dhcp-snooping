@@ -21,17 +21,13 @@ def result_content(task: Task) -> str:
     return "\n".join(content)
 
 
-def get_config(task: Task):
+def get_config(task: Task) -> Result:
     task.run(
         name="Uplink interface to dhcp server",
         task=netmiko_send_command,
         command_string=f"disp mac-address vlan {task.host['vlan']} | inc {task.host['ser_mac']}",
     )
-    task.run(
-        name="Dhcp snooping binding table",
-        task=netmiko_send_command,
-        command_string=f"display dhcp snooping user-bind vlan {task.host['vlan']}",
-    )
+
     task.run(
         task=write_file,
         filename=f"logs/{task.host.name}.txt",
@@ -70,6 +66,32 @@ def send_config(task: Task, cli_tpl: str):
     )
 
 
+def verify_config(task: Task):
+    task.run(
+        name="DHCP snooping configuration",
+        task=netmiko_send_command,
+        command_string=f"display dhcp snooping configuration",
+    )
+
+    task.run(
+        task=write_file,
+        filename=f"logs/{task.host.name}.txt",
+        content=result_content(task),
+        append=True,
+        severity_level=logging.DEBUG,
+    )
+
+    parsed = parse_output("huawei", "disp dhcp snooping conf", task.results[0].result)
+    # Verify dhcp snooping enabled globally and vlan
+    i = next(
+        (i for i, item in enumerate(parsed) if item["view"] == task.host["vlan"]), None
+    )
+    if i is None:
+        raise AssertionError(f"DHCP snooping {task.host['vlan']} not enabled")
+    else:
+        assert parsed[i]["enabled"] == "enable", f"DHCP snooping {task.host['vlan']} not enabled"
+
+
 if __name__ == "__main__":
     print_title("Nornir Playbook to configure DHCP Snooping")
     nr = InitNornir(config_file="config.yaml")
@@ -81,6 +103,10 @@ if __name__ == "__main__":
     print_result(result)
     # Config
     result = test_env.run(task=send_config, cli_tpl="cli-dhcpsnoop-en.j2")
+    print_result(result)
+
+    # Verification
+    result = test_env.run(task=verify_config)
     print_result(result)
 
     print_title("Running on Prod env")
