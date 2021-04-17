@@ -20,13 +20,13 @@ pip install -r requirements.txt
 ```
 2. Add the textfsm template definition to site-package ntc_templates
 ```sh
-LOC=`python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"`
+LOC=`python3 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"`
 LOC=${LOC}/ntc_templates/templates
-cp ntc_templates/huawei_vrp_display_mac-address_inc.textfsm ${LOC}/huawei_vrp_display_mac-address_inc.textfsm
+cp ntc_templates/*.textfsm ${LOC}/
 ```
 3. Append the textfsm template header to index of site-package ntc_templates
 ```sh
-cat ntc_templates/index | tee -a file.txt ${LOC}/index
+cat ntc_templates/index >> ${LOC}/index
 ```
 4. Create logs folder
 ```sh
@@ -79,3 +79,7 @@ MAC Address    VLAN/VSI/BD                       Learned-From        Type
 ```
 4. Deliver the commands rendered of `inventory/cli-dhcpsnoop-en.j2`
 5. Verify the dhcp snooping state by `disp dhcp snooping configuration`
+
+## Parsers
+* TextFSM parser using textfsm CLI table
+* Genie parser using inherited MetaParser class and schema
