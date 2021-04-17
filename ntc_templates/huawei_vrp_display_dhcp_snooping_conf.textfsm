@@ -1,0 +1,17 @@
+Value Required VIEW (\d+|[\w\d/-]+)
+Value ENABLED (enable)
+Value INTERF_TRUSTED ([\w\d/-]+)
+
+
+Start
+  ^dhcp\s+snooping\s+enable\s+ipv4
+  ^vlan\s+${VIEW} -> View
+  ^interface\s+${VIEW} -> View
+  ^\s*$$
+  ^#$$
+  ^. -> Error
+  
+View
+  ^\s+dhcp\s+snooping\s+${ENABLED}
+  ^\s+dhcp\s+snooping\s+trusted\s+interface\s+${INTERF_TRUSTED}
+  ^#$$ -> Record Start
