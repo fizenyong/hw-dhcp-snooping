@@ -8,13 +8,15 @@ Script created using:
 * Jinja2: Generating device configuration files
 * TextFSM: CLI parsing to structured format
 * ntc_template: TextFSM templates
-* PyATS Genie: Parsing library (under genie-parser branch)
-  * Note: pyATS framework does not support Windows.
+* PyATS (under genie-parser branch)
+  * Genie: Parsing library
+  * AEtest: Testcase templating
+  * Note: pyATS framework does not support Windows
 
 ## Getting Started
 1. Install dependency
    1. Branch `main` using TextFSM parser
-   2. Branch `genie-parser` using Genie parser
+   2. Branch `genie-parser` using PyATS framework (Genie and AEtest)
 ```sh
 pip install -r requirements.txt
 ```
@@ -79,7 +81,12 @@ MAC Address    VLAN/VSI/BD                       Learned-From        Type
 ```
 4. Deliver the commands rendered of `inventory/cli-dhcpsnoop-en.j2`
 5. Verify the dhcp snooping state by `disp dhcp snooping configuration`
+6. (Optional) Validate the network state by AEtest testcase
 
 ## Parsers
 * TextFSM parser using textfsm CLI table
 * Genie parser using inherited MetaParser class and schema
+
+## Validation and Testcase
+* AEtest testcases (reporter data as Nornir Result)
+* Diff of json structured network state data
